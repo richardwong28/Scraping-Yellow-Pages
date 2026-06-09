@@ -1,34 +1,79 @@
-# B2B Lead Generation Engine (Yellow Pages Scraper)
+# YellowPages Scraper
 
-A high-performance, automated lead generation tool designed to extract business intelligence from directory listings. This project focuses on **Scalability**, **Pagination Handling**, and **Data Integrity**.
+Async web scraper for extracting business leads from YellowPages.com. Built with Python, Playwright, and BeautifulSoup — outputs clean, deduplicated CSV files ready for outreach or analysis.
 
-## Business Value
-This tool enables businesses to automate their market research and lead prospecting by extracting thousands of business contacts (Name, Phone, Website) across various categories and locations in minutes.
+## What it does
 
-## Advanced Features
+- Searches any keyword + location on YellowPages.com (e.g. `"Dentist"` in `"New York"`)
+- Extracts: business name, phone number, website URL, and star rating
+- Handles multi-page pagination automatically
+- Applies stealth techniques to reduce bot detection
+- Cleans and deduplicates results before saving
+- Saves output as UTF-8 CSV compatible with Excel and Google Sheets
 
-* **Automated Pagination:** Seamlessly crawls through multiple search result pages using dynamic URL injection.
-* **Lead Aggregation:** Collects and merges data from hundreds of listings into a single, clean dataset.
-* **Smart Duplicate Removal:** Integrated with **Pandas** to identify and remove duplicate entries (common in "Featured Ads" sections).
-* **Defensive Scraping:** Implements `playwright-stealth` and randomized delays to mimic human browsing behavior and minimize bot detection.
-* **Robust Error Handling:** Uses a "Parent-to-Child" extraction logic to ensure data remains aligned even when certain fields (like websites) are missing.
+## Tech stack
 
-## Technical Stack
+| Tool | Role |
+|---|---|
+| Python 3.10+ | Core language |
+| Playwright (async) | Browser automation |
+| playwright-stealth | Anti-bot fingerprint reduction |
+| BeautifulSoup | HTML parsing for rating extraction |
+| Pandas | Data cleaning and deduplication |
 
-* **Core:** Python 3.13
-* **Automation:** Playwright (Chromium)
-* **Bypass Tech:** Playwright-Stealth
-* **Data Processing:** Pandas
-* **Storage:** CSV / Excel (XLSX)
+## Project structure
 
-## Project Architecture
-
-```text
-Portfolio-2/
-├── output/             # Generated lead databases (CSV)
+```
 ├── src/
-│   ├── scraper.py      # Pagination & Extraction logic
-│   ├── data_handler.py # Data cleaning & deduplication
-│   └── browser_manager.py # Browser & Fingerprint management
-├── main.py             # Orchestrator
-└── README.md
+│   ├── scraper.py          # Core scraping logic (async, paginated)
+│   ├── browser_manager.py  # Browser context with rotating user agents
+│   └── data_handler.py     # Deduplication and CSV export
+├── main.py                 # Entry point
+├── output/                 # CSV results saved here
+├── logs/                   # Runtime logs
+└── requirements.txt
+```
+
+## Setup
+
+```bash
+# Install dependencies
+pip install playwright playwright-stealth beautifulsoup4 pandas openpyxl
+playwright install chromium
+
+# Run
+python main.py
+```
+
+Edit `main.py` to change keyword and location:
+
+```python
+keyword = "Dentist"
+location = "New York"
+```
+
+## Output format
+
+```
+Name,Phone,Web,Rating
+Bright Smile Dental,+1 (212) 555-0142,https://brightsmile.com,4.5
+Downtown Orthodontics,+1 (212) 555-0198,N/A,3
+...
+```
+
+## Notes
+
+- YellowPages uses anti-bot protection. If scraping fails, the site may be blocking the request — not a code bug. Increasing delay or using a residential proxy resolves this.
+- CSS selectors may need updating if YellowPages changes their HTML structure. Verify selectors in browser DevTools before running at scale.
+- Always respect the target site's `robots.txt` and terms of service.
+
+## Key technical decisions
+
+**Why async Playwright over Requests/Scrapy?**
+YellowPages renders content client-side. Playwright handles JavaScript-rendered pages that Requests cannot access.
+
+**Why BeautifulSoup for ratings?**
+Ratings are encoded as CSS class names (e.g. `four-half`), not text — BS4 makes parsing the class list straightforward alongside Playwright's async context.
+
+**Why `utf-8-sig` encoding?**
+Windows Excel auto-detects BOM-signed UTF-8 correctly. Without it, special characters in business names render as garbage in Excel on Indonesian/Asian locales.
