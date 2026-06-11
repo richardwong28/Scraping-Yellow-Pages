@@ -77,3 +77,5 @@ Ratings are encoded as CSS class names (e.g. `four-half`), not text — BS4 make
 
 **Why `utf-8-sig` encoding?**
 Windows Excel auto-detects BOM-signed UTF-8 correctly. Without it, special characters in business names render as garbage in Excel on Indonesian/Asian locales.
+
+<img width="1919" height="868" alt="image" src="https://github.com/user-attachments/assets/7263f5e4-2475-42ea-83d6-8f6d5a908e58" />
